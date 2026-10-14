@@ -48,6 +48,7 @@ form {
   margin-top: 20px;
 }
 
+input,
 textarea,
 button {
   padding: 12px;
@@ -56,6 +57,7 @@ button {
   font: inherit;
 }
 
+input,
 textarea {
   width: 100%;
   resize: vertical;
@@ -75,4 +77,12 @@ button:disabled {
 
 [role="alert"] {
   color: #a51d25;
+}
+
+dt {
+  font-weight: bold;
+}
+
+dd {
+  margin: 4px 0 12px;
 }
