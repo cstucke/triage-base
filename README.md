@@ -65,3 +65,20 @@ empty/non-string message returns HTTP 400 with an `error`.
 npm run typecheck
 npm run build
 ```
+
+### Architecture
+- [x] One LLM module: `lib/llm.ts` builds the only OpenAI client. Routes use it; no SDK calls in components.
+- [ ] Prompts live in one place, with a `PROMPT_VERSION`: partial. The triage prompts (v1, v2) and their versions are in `lib/prompt.ts`, but the chat system prompt is still in `app/api/chat/route.ts`.
+- [x] All provider settings come from configuration: base URL, key, model, structured-output mode and prices are read from `.env.local`.
+
+### Error handling
+- [x] Every failure in the error table maps to one status, one safe message and one error code (`/api/triage`).
+- [x] Timeouts and retries are set explicitly: `timeout: 30_000` (per attempt) and `maxRetries: 1` in `lib/llm.ts`.
+- [x] No stack trace or provider detail reaches the browser: errors are logged on the server only.
+
+### Security
+- [x] The key is used only on the server: only server files import `lib/llm.ts` (the triage page imports a type only).
+- [x] `.env.local` is ignored by git: `git check-ignore -v .env.local` prints `.gitignore:5:.env*       .env.local`.
+- [x] **Fixed:** the API rejects over-long input with `400` before any provider call (ticket body over 5,000 characters, `/api/triage`).
+- [x] Logs contain no key and no ticket text: `logs/llm-calls.jsonl` stores only time, route, API, prompt version, model, status, tokens and cost.
+- [ ] The injection tickets do not change the category, priority or format of the answer: not verified yet (the smoke runs so far ended in `429`).

@@ -1,5 +1,7 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
 import { LOG_FILE, type LlmCallLog } from "../../lib/log";
+import { RUNS_DIR, type SmokeRun } from "../../lib/smoke";
 
 // Read the log file on every request, not once at build time.
 export const dynamic = "force-dynamic";
@@ -17,6 +19,20 @@ async function readLog(): Promise<LlmCallLog[]> {
     .split("\n")
     .filter((line) => line.trim() !== "")
     .map((line) => JSON.parse(line) as LlmCallLog);
+}
+
+async function readRuns(): Promise<SmokeRun[]> {
+  let files: string[];
+  try {
+    files = await readdir(RUNS_DIR);
+  } catch {
+    return []; // no runs yet
+  }
+  return Promise.all(
+    files
+      .filter((file) => file.endsWith(".json"))
+      .map(async (file) => JSON.parse(await readFile(path.join(RUNS_DIR, file), "utf8")) as SmokeRun),
+  );
 }
 
 function totalsBy(rows: LlmCallLog[], key: (row: LlmCallLog) => string): [string, Totals][] {
@@ -70,6 +86,7 @@ function TotalsTable({ title, label, groups }: { title: string; label: string; g
 
 export default async function AdminPage() {
   const rows = await readLog();
+  const runs = await readRuns();
   const errors = totalsBy(rows.filter((row) => row.status !== 200), (row) => String(row.status));
 
   return (
@@ -135,6 +152,35 @@ export default async function AdminPage() {
                 <td>
                   {row.cost_usd !== null ? `$${row.cost_usd.toFixed(6)}` : row.usage ? "no price set" : "not reported"}
                 </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Smoke test runs</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Model</th>
+              <th>Outcome counts</th>
+              <th>Category accuracy</th>
+              <th>Priority accuracy</th>
+              <th>Avg latency</th>
+              <th>Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            {runs.map((run) => (
+              <tr key={run.date}>
+                <td>{run.date}</td>
+                <td>{run.model}</td>
+                <td>{Object.entries(run.outcome_counts).map(([status, n]) => `${status}: ${n}`).join(", ")}</td>
+                <td>{run.category_accuracy === null ? "n/a" : `${Math.round(run.category_accuracy * 100)}%`}</td>
+                <td>{run.priority_accuracy === null ? "n/a" : `${Math.round(run.priority_accuracy * 100)}%`}</td>
+                <td>{run.avg_latency_ms} ms</td>
+                <td>{run.total_cost_usd === null ? "n/a" : `$${run.total_cost_usd.toFixed(6)}`}</td>
               </tr>
             ))}
           </tbody>

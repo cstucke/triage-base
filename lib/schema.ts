@@ -6,7 +6,7 @@ export const PRIORITIES = ["low", "medium", "high"] as const;
 export const TriageRequestSchema = z.object({
   ticket: z.object({
     subject: z.string(),
-    body: z.string().trim().min(1),
+    body: z.string().trim().min(1).max(5000),
   }),
 });
 

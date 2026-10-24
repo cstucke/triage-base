@@ -1,0 +1,10 @@
+{"ts":"2026-10-24T09:59:50.131Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T09:59:51.046Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T09:59:51.943Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T09:59:51.959Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T09:59:52.757Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T09:59:52.761Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T09:59:53.699Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T09:59:53.704Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T09:59:54.572Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T09:59:55.419Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}

@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   const parsed = TriageRequestSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
-      { error: "Please provide a ticket with a string subject and a non-empty body." },
+       { error: "Please provide a ticket with a string subject and a non-empty body of at most 5,000 characters." },
       { status: 400 },
     );
   }

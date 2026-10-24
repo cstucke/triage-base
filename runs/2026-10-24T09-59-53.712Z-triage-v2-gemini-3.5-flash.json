@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-24T09:59:53.712Z",
+  "dataset": "labelled_100",
+  "prompt_version": "triage-v2",
+  "model": "gemini-3.5-flash",
+  "outcome_counts": {
+    "429": 5
+  },
+  "category_accuracy": null,
+  "priority_accuracy": null,
+  "category_mismatches": 0,
+  "priority_mismatches": 0,
+  "category_confusion": {},
+  "avg_latency_ms": 969,
+  "total_cost_usd": null,
+  "results": [
+    {
+      "ticket_id": "TCK-10168",
+      "outcome": 429,
+      "output": null,
+      "expected": {
+        "category": "billing",
+        "priority": "high"
+      },
+      "usage": null,
+      "cost_usd": null,
+      "latency_ms": 1267
+    },
+    {
+      "ticket_id": "TCK-10459",
+      "outcome": 429,
+      "output": null,
+      "expected": {
+        "category": "feature_request",
+        "priority": "low"
+      },
+      "usage": null,
+      "cost_usd": null,
+      "latency_ms": 919
+    },
+    {
+      "ticket_id": "TCK-10102",
+      "outcome": 429,
+      "output": null,
+      "expected": {
+        "category": "billing",
+        "priority": "medium"
+      },
+      "usage": null,
+      "cost_usd": null,
+      "latency_ms": 895
+    },
+    {
+      "ticket_id": "TCK-10420",
+      "outcome": 429,
+      "output": null,
+      "expected": {
+        "category": "technical_bug",
+        "priority": "medium"
+      },
+      "usage": null,
+      "cost_usd": null,
+      "latency_ms": 818
+    },
+    {
+      "ticket_id": "TCK-10035",
+      "outcome": 429,
+      "output": null,
+      "expected": {
+        "category": "technical_bug",
+        "priority": "medium"
+      },
+      "usage": null,
+      "cost_usd": null,
+      "latency_ms": 944
+    }
+  ]
+}
