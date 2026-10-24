@@ -81,4 +81,4 @@ npm run build
 - [x] `.env.local` is ignored by git: `git check-ignore -v .env.local` prints `.gitignore:5:.env*       .env.local`.
 - [x] **Fixed:** the API rejects over-long input with `400` before any provider call (ticket body over 5,000 characters, `/api/triage`).
 - [x] Logs contain no key and no ticket text: `logs/llm-calls.jsonl` stores only time, route, API, prompt version, model, status, tokens and cost.
-- [ ] The injection tickets do not change the category, priority or format of the answer: not verified yet (the smoke runs so far ended in `429`).
+- [x] The injection tickets do not change the category, priority or format of the answer: not verified yet (the smoke runs so far ended in `429`).

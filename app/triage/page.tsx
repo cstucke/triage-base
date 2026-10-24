@@ -21,6 +21,8 @@ export default function TriagePage() {
   const [answer, setAnswer] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [isExplaining, setIsExplaining] = useState(false);
 
   async function submitTicket(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,6 +32,7 @@ export default function TriagePage() {
     setError(null);
     setTriage(null);
     setAnswer(null);
+    setExplanation(null);
 
     try {
       const response = await fetch(ENDPOINTS[version], {
@@ -72,6 +75,35 @@ export default function TriagePage() {
       );
     } finally {
       setIsSending(false);
+    }
+  }
+
+  async function explainTriage() {
+    setIsExplaining(true);
+    setError(null);
+    setExplanation("");
+
+    try {
+      const response = await fetch("/api/triage/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticket: { subject, body }, triage }),
+      });
+      if (!response.ok || !response.body) throw new Error("Explain request failed.");
+
+      // Append the text as it arrives.
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const text = decoder.decode(value, { stream: true });
+        setExplanation((previous) => (previous ?? "") + text);
+      }
+    } catch {
+      setError("Unable to explain this triage. Please try again.");
+    } finally {
+      setIsExplaining(false);
     }
   }
 
@@ -137,6 +169,10 @@ export default function TriagePage() {
                 : "Not reported by the provider"}
             </dd>
           </dl>
+          <button type="button" onClick={explainTriage} disabled={isExplaining}>
+            {isExplaining ? "Explaining..." : "Explain"}
+          </button>
+          {explanation !== null && <p>{explanation}</p>}
         </section>
       )}
     </main>

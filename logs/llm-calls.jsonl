@@ -8,3 +8,12 @@
 {"ts":"2026-10-24T09:59:53.704Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
 {"ts":"2026-10-24T09:59:54.572Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
 {"ts":"2026-10-24T09:59:55.419Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash","status":429,"usage":null,"cost_usd":null}
+{"ts":"2026-10-24T18:42:30.214Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash-lite","status":200,"usage":{"input":146,"output":67,"total":213},"cost_usd":null}
+{"ts":"2026-10-24T18:42:36.108Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash-lite","status":200,"usage":{"input":148,"output":62,"total":210},"cost_usd":null}
+{"ts":"2026-10-24T18:42:42.349Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash-lite","status":200,"usage":{"input":152,"output":77,"total":229},"cost_usd":null}
+{"ts":"2026-10-24T18:42:48.186Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash-lite","status":200,"usage":{"input":144,"output":58,"total":202},"cost_usd":null}
+{"ts":"2026-10-24T18:42:56.531Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash-lite","status":200,"usage":{"input":139,"output":68,"total":207},"cost_usd":null}
+{"ts":"2026-10-24T18:43:02.734Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash-lite","status":200,"usage":{"input":150,"output":72,"total":222},"cost_usd":null}
+{"ts":"2026-10-24T18:43:11.358Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash-lite","status":200,"usage":{"input":137,"output":60,"total":197},"cost_usd":null}
+{"ts":"2026-10-24T18:43:20.128Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash-lite","status":200,"usage":{"input":141,"output":67,"total":208},"cost_usd":null}
+{"ts":"2026-10-24T18:43:30.783Z","route":"/api/triage","api":"chat.completions","prompt_version":"triage-v2","model":"gemini-3.5-flash-lite","status":200,"usage":{"input":124,"output":62,"total":186},"cost_usd":null}

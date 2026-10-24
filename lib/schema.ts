@@ -18,6 +18,7 @@ export const TriageSchema = z.strictObject({
 });
 
 export type TriageResult = z.infer<typeof TriageSchema>;
+export const ExplainRequestSchema = TriageRequestSchema.extend({ triage: TriageSchema });
 
 const { $schema: _meta, ...triageJsonSchema } = z.toJSONSchema(TriageSchema);
 export const TRIAGE_JSON_SCHEMA = triageJsonSchema;
