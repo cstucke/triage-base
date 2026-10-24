@@ -24,3 +24,16 @@ if (!STRUCTURED_OUTPUT_MODES.includes(rawMode as StructuredOutputMode)) {
 export const LLM_STRUCTURED_OUTPUT = rawMode as StructuredOutputMode;
 
 export const llm = new OpenAI({ apiKey, baseURL, timeout: 30_000, maxRetries: 1 });
+
+const priceInput = process.env.LLM_PRICE_INPUT_PER_1M;
+const priceOutput = process.env.LLM_PRICE_OUTPUT_PER_1M;
+const PRICE_INPUT_PER_1M = priceInput ? Number(priceInput) : null;
+const PRICE_OUTPUT_PER_1M = priceOutput ? Number(priceOutput) : null;
+
+export type Usage = { input: number; output: number; total: number };
+
+/** Estimated cost in USD, or null when the provider reported no usage or no price is set. */
+export function costOf(usage: Usage | null): number | null {
+  if (!usage || PRICE_INPUT_PER_1M === null || PRICE_OUTPUT_PER_1M === null) return null;
+  return (usage.input * PRICE_INPUT_PER_1M + usage.output * PRICE_OUTPUT_PER_1M) / 1_000_000;
+}

@@ -1,23 +1,5 @@
 import { z } from "zod";
-
-// Single source of truth for the triage result. The JSON Schema sent to the
-// provider and the prompt description are both derived from this.
-export const CATEGORIES = ["billing", "technical_bug", "account", "feature_request"] as const;
-export const PRIORITIES = ["low", "medium", "high"] as const;
-
-export const TriageSchema = z.strictObject({
-  category: z.enum(CATEGORIES),
-  priority: z.enum(PRIORITIES),
-  summary: z.string().min(1),
-  suggested_action: z.string().min(1),
-});
-
-export type TriageResult = z.infer<typeof TriageSchema>;
-
-// strictObject -> additionalProperties: false, and every key is required.
-// Drop the "$schema" meta key: providers expect the bare schema object.
-const { $schema: _meta, ...triageJsonSchema } = z.toJSONSchema(TriageSchema);
-export const TRIAGE_JSON_SCHEMA = triageJsonSchema;
+import { TriageSchema, type TriageResult } from "./schema";
 
 export type ParseResult =
   | { ok: true; data: TriageResult }

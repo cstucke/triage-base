@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseTriage, TRIAGE_JSON_SCHEMA } from "./triage";
+import { TRIAGE_JSON_SCHEMA } from "./schema";
+import { parseTriage } from "./triage";
 
 const valid = {
   category: "billing",

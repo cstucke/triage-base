@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import type { TriageResult } from "../../lib/triage";
+import type { TriageResult } from "../../lib/schema";
+import type { Usage } from "../../lib/llm";
 
 type Version = "v1" | "v2";
 
@@ -14,6 +15,7 @@ const ENDPOINTS: Record<Version, string> = {
 export default function TriagePage() {
   const [version, setVersion] = useState<Version>("v2");
   const [subject, setSubject] = useState("");
+  const [usage, setUsage] = useState<Usage | null>(null);
   const [body, setBody] = useState("");
   const [triage, setTriage] = useState<TriageResult | null>(null);
   const [answer, setAnswer] = useState<string | null>(null);
@@ -40,9 +42,9 @@ export default function TriagePage() {
       if (!response.ok) {
         const detail =
           typeof data === "object" &&
-          data !== null &&
-          "error" in data &&
-          typeof data.error === "string"
+            data !== null &&
+            "error" in data &&
+            typeof data.error === "string"
             ? data.error
             : "Unable to triage this ticket. Please try again.";
         throw new Error(detail);
@@ -60,7 +62,9 @@ export default function TriagePage() {
         setAnswer(data.answer);
       } else {
         // The server only sends results that passed Zod validation.
-        setTriage((data as { triage: TriageResult }).triage);
+        const result = data as { triage: TriageResult; usage: Usage | null };
+        setTriage(result.triage);
+        setUsage(result.usage);
       }
     } catch (error) {
       setError(
@@ -126,6 +130,12 @@ export default function TriagePage() {
             <dd>{triage.summary}</dd>
             <dt>Suggested action</dt>
             <dd>{triage.suggested_action}</dd>
+            <dt>Tokens</dt>
+            <dd>
+              {usage
+                ? `${usage.input} input, ${usage.output} output, ${usage.total} total`
+                : "Not reported by the provider"}
+            </dd>
           </dl>
         </section>
       )}

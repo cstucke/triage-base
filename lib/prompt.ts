@@ -1,5 +1,5 @@
 import type { StructuredOutputMode } from "./llm";
-import { CATEGORIES, PRIORITIES } from "./triage";
+import { CATEGORIES, PRIORITIES } from "./schema";
 
 export const PROMPT_VERSION_V1 = "triage-v1";
 
@@ -10,7 +10,7 @@ Read the support ticket inside <ticket> tags and reply with:
 - Summary: a concise one-sentence summary of the customer's issue.
 - Suggested action: one next step for the support agent.`;
 
-export const PROMPT_VERSION = "v2";
+export const PROMPT_VERSION = "triage-v2";
 
 const BASE_PROMPT = `You are a support ticket triage assistant for a software company.
 Read the support ticket and decide:
