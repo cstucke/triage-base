@@ -1,0 +1,277 @@
+{
+  "date": "2026-10-24T20:13:36.803Z",
+  "dataset": "labelled_100",
+  "strategy": "dm+llm",
+  "prompt_version": "triage-dm-llm-v1",
+  "model": "vllm-sr/d3-flash+gemini-3.5-flash-lite",
+  "outcome_counts": {
+    "200": 5
+  },
+  "category_accuracy": 1,
+  "priority_accuracy": 0.6,
+  "category_mismatches": 0,
+  "priority_mismatches": 2,
+  "category_confusion": {
+    "feature_request": {
+      "feature_request": 2
+    },
+    "billing": {
+      "billing": 1
+    },
+    "technical_bug": {
+      "technical_bug": 1
+    },
+    "account": {
+      "account": 1
+    }
+  },
+  "avg_latency_ms": 4165,
+  "total_cost_usd": null,
+  "results": [
+    {
+      "ticket_id": "TCK-10148",
+      "outcome": 200,
+      "output": {
+        "category": "feature_request",
+        "priority": "low",
+        "summary": "The customer is requesting a new feature to add bulk delete functionality for dashboards.",
+        "suggested_action": "Log the feature request in the product backlog and send a standard acknowledgment response to the customer."
+      },
+      "expected": {
+        "category": "feature_request",
+        "priority": "low"
+      },
+      "usage": {
+        "input": 173,
+        "output": 45,
+        "total": 218
+      },
+      "dm_usage": {
+        "input": 411,
+        "output": 0,
+        "total": 411
+      },
+      "dm_answers": {
+        "category": {
+          "type": "choice",
+          "choice": "feature_request",
+          "probabilities": {
+            "billing": 0.0013104215310834712,
+            "technical_bug": 0.03073426501058581,
+            "account": 0.01879855677215814,
+            "feature_request": 0.9491567566861726
+          },
+          "confidence": 0.826905921075702
+        },
+        "priority": {
+          "type": "choice",
+          "choice": "low",
+          "probabilities": {
+            "low": 0.6820647069657988,
+            "medium": 0.2609503249753242,
+            "high": 0.05698496805887693
+          },
+          "confidence": 0.2947409384603309
+        }
+      },
+      "cost_usd": null,
+      "latency_ms": 5783
+    },
+    {
+      "ticket_id": "TCK-10196",
+      "outcome": 200,
+      "output": {
+        "category": "feature_request",
+        "priority": "low",
+        "summary": "The customer is requesting a feature to add comments and annotations on charts for better context sharing among colleagues.",
+        "suggested_action": "Log this feature request in the product backlog and send a polite confirmation email to the user thanking them for the suggestion."
+      },
+      "expected": {
+        "category": "feature_request",
+        "priority": "low"
+      },
+      "usage": {
+        "input": 179,
+        "output": 61,
+        "total": 240
+      },
+      "dm_usage": {
+        "input": 431,
+        "output": 0,
+        "total": 431
+      },
+      "dm_answers": {
+        "category": {
+          "type": "choice",
+          "choice": "feature_request",
+          "probabilities": {
+            "billing": 0.00003527288896959962,
+            "technical_bug": 0.0002234898746923813,
+            "account": 0.00006476629629191765,
+            "feature_request": 0.9996764709400461
+          },
+          "confidence": 0.9977000197572472
+        },
+        "priority": {
+          "type": "choice",
+          "choice": "low",
+          "probabilities": {
+            "low": 0.7746280413711722,
+            "medium": 0.2193557167906414,
+            "high": 0.006016241838186416
+          },
+          "confidence": 0.48903059209508337
+        }
+      },
+      "cost_usd": null,
+      "latency_ms": 4660
+    },
+    {
+      "ticket_id": "TCK-10450",
+      "outcome": 200,
+      "output": {
+        "category": "billing",
+        "priority": "low",
+        "summary": "The customer is inquiring about switching their Enterprise plan from monthly to annual billing and wants to know if there is a cost savings.",
+        "suggested_action": "Provide the customer with the annual pricing details for the Enterprise plan, highlighting any potential discounts, and outline the steps required to transition their billing cycle."
+      },
+      "expected": {
+        "category": "billing",
+        "priority": "low"
+      },
+      "usage": {
+        "input": 193,
+        "output": 72,
+        "total": 265
+      },
+      "dm_usage": {
+        "input": 459,
+        "output": 0,
+        "total": 459
+      },
+      "dm_answers": {
+        "category": {
+          "type": "choice",
+          "choice": "billing",
+          "probabilities": {
+            "billing": 0.9739214415461543,
+            "technical_bug": 0.002631804270454645,
+            "account": 0.01317562194473321,
+            "feature_request": 0.010271132238657823
+          },
+          "confidence": 0.8950896955967004
+        },
+        "priority": {
+          "type": "choice",
+          "choice": "low",
+          "probabilities": {
+            "low": 0.8450936006370228,
+            "medium": 0.15047221817672488,
+            "high": 0.004434181186252319
+          },
+          "confidence": 0.5892517887973163
+        }
+      },
+      "cost_usd": null,
+      "latency_ms": 2636
+    },
+    {
+      "ticket_id": "TCK-10260",
+      "outcome": 200,
+      "output": {
+        "category": "technical_bug",
+        "priority": "medium",
+        "summary": "The customer briefly saw data from another organization while applying a region filter on a shared dashboard.",
+        "suggested_action": "Investigate dashboard query caching and multi-tenant data isolation settings for potential cache bleeding."
+      },
+      "expected": {
+        "category": "technical_bug",
+        "priority": "high"
+      },
+      "usage": {
+        "input": 237,
+        "output": 53,
+        "total": 290
+      },
+      "dm_usage": {
+        "input": 539,
+        "output": 0,
+        "total": 539
+      },
+      "dm_answers": {
+        "category": {
+          "type": "choice",
+          "choice": "technical_bug",
+          "probabilities": {
+            "billing": 0.0005888016193456621,
+            "technical_bug": 0.950424115534571,
+            "account": 0.04512039480866067,
+            "feature_request": 0.003866688037422675
+          },
+          "confidence": 0.8456401808063593
+        },
+        "priority": {
+          "type": "choice",
+          "choice": "medium",
+          "probabilities": {
+            "low": 0.26839741664532696,
+            "medium": 0.5399022617950698,
+            "high": 0.1917003215596032
+          },
+          "confidence": 0.08752857783128609
+        }
+      },
+      "cost_usd": null,
+      "latency_ms": 2760
+    },
+    {
+      "ticket_id": "TCK-10188",
+      "outcome": 200,
+      "output": {
+        "category": "account",
+        "priority": "low",
+        "summary": "The customer is requesting a copy of all personal data held by the company for their account.",
+        "suggested_action": "Verify the customer's identity and initiate the standard data export process in compliance with privacy regulations."
+      },
+      "expected": {
+        "category": "account",
+        "priority": "medium"
+      },
+      "usage": {
+        "input": 193,
+        "output": 55,
+        "total": 248
+      },
+      "dm_usage": {
+        "input": 459,
+        "output": 0,
+        "total": 459
+      },
+      "dm_answers": {
+        "category": {
+          "type": "choice",
+          "choice": "account",
+          "probabilities": {
+            "billing": 0.006159233275575755,
+            "technical_bug": 0.00965157338933974,
+            "account": 0.864198781411838,
+            "feature_request": 0.11999041192324644
+          },
+          "confidence": 0.6705666955255127
+        },
+        "priority": {
+          "type": "choice",
+          "choice": "low",
+          "probabilities": {
+            "low": 0.7463657793427891,
+            "medium": 0.2420427480913841,
+            "high": 0.011591472565826724
+          },
+          "confidence": 0.4416756199536145
+        }
+      },
+      "cost_usd": null,
+      "latency_ms": 4987
+    }
+  ]
+}

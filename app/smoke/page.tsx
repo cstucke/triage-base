@@ -2,10 +2,12 @@
 
 import { useState, type FormEvent } from "react";
 import type { Dataset, SmokeRun } from "../../lib/smoke";
+import type { Strategy } from "../../lib/schema";
 
 export default function SmokePage() {
   const [dataset, setDataset] = useState<Dataset>("labelled_100");
   const [count, setCount] = useState(5);
+  const [strategy, setStrategy] = useState<Strategy>("llm");
   const [run, setRun] = useState<SmokeRun | null>(null);
 
   async function startRun(event: FormEvent<HTMLFormElement>) {
@@ -14,7 +16,7 @@ export default function SmokePage() {
     const response = await fetch("/api/smoke", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ dataset, count }),
+      body: JSON.stringify({ dataset, count, strategy }),
     });
     setRun(await response.json());
   }
@@ -29,6 +31,12 @@ export default function SmokePage() {
         <select id="dataset" value={dataset} onChange={(event) => setDataset(event.target.value as Dataset)}>
           <option value="labelled_100">Labelled set (100 tickets)</option>
           <option value="all_500">Full set (500 tickets)</option>
+        </select>
+        <label htmlFor="strategy">Strategy</label>
+        <select id="strategy" value={strategy} onChange={(event) => setStrategy(event.target.value as Strategy)}>
+          <option value="llm">llm: the LLM triages the ticket</option>
+          <option value="dm">dm: the decision model chooses category and priority</option>
+          <option value="dm+llm">dm+llm: the DM chooses, the LLM writes summary and action</option>
         </select>
         <label htmlFor="count">Number of tickets to sample at random</label>
         <input
@@ -78,7 +86,11 @@ export default function SmokePage() {
           <p>Outcomes: {Object.entries(run.outcome_counts).map(([status, n]) => `${status}: ${n}`).join(", ")}</p>
           <p>
             Average latency: {run.avg_latency_ms} ms. Cost:{" "}
-            {run.total_cost_usd === null ? "n/a" : `$${run.total_cost_usd.toFixed(6)}`}
+            {run.total_cost_usd === null
+              ? "n/a"
+              : run.total_cost_usd === 0
+                ? "$0 (free tier)"
+                : `$${run.total_cost_usd.toFixed(6)}`}
           </p>
           {labelled && (
             <p>

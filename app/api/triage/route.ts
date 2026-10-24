@@ -1,31 +1,47 @@
-import { costOf, llm, LLM_MODEL, LLM_STRUCTURED_OUTPUT, type Usage } from "../../../lib/llm";
+import { askDm, type DmDecision, type DmFailure } from "../../../lib/dm";
+import { llm, LLM_MODEL, LLM_STRUCTURED_OUTPUT, type Usage } from "../../../lib/llm";
 import { logLlmCall } from "../../../lib/log";
 import {
+  buildDmLlmSystemPrompt,
+  buildDmLlmUserMessage,
   buildSystemPrompt,
   buildUserMessage,
-  PROMPT_VERSION,
-  type Ticket,
 } from "../../../lib/prompt";
-import { parseTriage } from "../../../lib/triage";
-import { TRIAGE_JSON_SCHEMA, TriageRequestSchema } from "../../../lib/schema";
+import { STRATEGY_INFO, strategyCost } from "../../../lib/strategy";
+import { parseDmLlm, parseTriage } from "../../../lib/triage";
+import { TRIAGE_JSON_SCHEMA, TriageRequestSchema, WRITEUP_JSON_SCHEMA } from "../../../lib/schema";
 import OpenAI from "openai";
 
 const MAX_ATTEMPTS = 2; // one retry if the model's output fails validation
 const NO_USAGE: Usage = { input: 0, output: 0, total: 0 };
 
+// DM failures map onto the same error table as the LLM ones.
+const DM_ERRORS: Record<DmFailure, { status: number; error: string }> = {
+  invalid_model_output: { status: 502, error: "The decision model returned an invalid triage result. Please try again." },
+  rate_limited: { status: 429, error: "Too many requests. Please try again later." },
+  triage_unavailable: { status: 502, error: "The decision model request failed." },
+  triage_timeout: { status: 504, error: "The decision model took too long to answer." },
+  internal_error: { status: 500, error: "Something went wrong on our side." },
+};
+
 type ModelCall = { raw: string; usage: Usage | null };
 
-async function callModel(ticket: Ticket): Promise<ModelCall> {
+async function callModel(
+  system: string,
+  user: string,
+  schemaName: string,
+  schema: Record<string, unknown>,
+): Promise<ModelCall> {
   const completion = await llm.chat.completions.create({
     model: LLM_MODEL,
     messages: [
-      { role: "system", content: buildSystemPrompt(LLM_STRUCTURED_OUTPUT) },
-      { role: "user", content: buildUserMessage(ticket) },
+      { role: "system", content: system },
+      { role: "user", content: user },
     ],
     ...(LLM_STRUCTURED_OUTPUT === "json_schema" && {
       response_format: {
         type: "json_schema",
-        json_schema: { name: "triage_result", strict: true, schema: TRIAGE_JSON_SCHEMA },
+        json_schema: { name: schemaName, strict: true, schema },
       },
     }),
   });
@@ -62,27 +78,59 @@ export async function POST(request: Request) {
     );
   }
 
-  let usage: Usage | null = NO_USAGE;
+  const { ticket, strategy } = parsed.data;
+  const info = STRATEGY_INFO[strategy];
+  let usage: Usage | null = NO_USAGE; // LLM tokens
+  let dmUsage: Usage | null = null; // DM tokens
 
   // Log one line for this request, then reply.
   async function reply(status: number, responseBody: object): Promise<Response> {
     await logLlmCall({
       ts: new Date().toISOString(),
       route: "/api/triage",
-      api: "chat.completions",
-      prompt_version: PROMPT_VERSION,
-      model: LLM_MODEL,
+      api: info.api,
+      strategy,
+      prompt_version: info.promptVersion,
+      model: info.model,
       status,
-      usage,
-      cost_usd: costOf(usage),
+      usage: strategy === "llm" ? usage : strategy === "dm" ? dmUsage : addUsage(usage, dmUsage),
+      cost_usd: strategyCost(strategy, usage, dmUsage),
     });
     return Response.json(responseBody, { status });
   }
 
+  // dm and dm+llm: the DM chooses category and priority first.
+  let dm: DmDecision | null = null;
+  if (strategy !== "llm") {
+    const dmCall = await askDm(ticket);
+    if (!dmCall.ok) {
+      const { status, error } = DM_ERRORS[dmCall.code];
+      return reply(status, { error, code: dmCall.code });
+    }
+    dm = dmCall;
+    dmUsage = dmCall.usage;
+    if (strategy === "dm") {
+      return reply(200, { triage: dmCall.decision, promptVersion: info.promptVersion, dmUsage, dmAnswers: dmCall.answers });
+    }
+  }
+
+  // llm: the LLM triages the ticket. dm+llm: it writes summary and suggested_action for the DM's choice.
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     let call: ModelCall;
     try {
-      call = await callModel(parsed.data.ticket);
+      call = dm
+        ? await callModel(
+            buildDmLlmSystemPrompt(LLM_STRUCTURED_OUTPUT),
+            buildDmLlmUserMessage(ticket, dm.decision),
+            "triage_writeup",
+            WRITEUP_JSON_SCHEMA,
+          )
+        : await callModel(
+            buildSystemPrompt(LLM_STRUCTURED_OUTPUT),
+            buildUserMessage(ticket),
+            "triage_result",
+            TRIAGE_JSON_SCHEMA,
+          );
     } catch (err) {
       console.error("LLM call failed:", err);
       usage = null; // a failed call reports no usage
@@ -100,16 +148,21 @@ export async function POST(request: Request) {
     }
 
     usage = addUsage(usage, call.usage);
-    const result = parseTriage(call.raw);
+    const result = dm ? parseDmLlm(call.raw, dm.decision) : parseTriage(call.raw);
     if (result.ok) {
-      return reply(200, { triage: result.data, promptVersion: PROMPT_VERSION, usage });
+      return reply(200, {
+        triage: result.data,
+        promptVersion: info.promptVersion,
+        usage,
+        ...(dm && { dmUsage, dmAnswers: dm.answers }),
+      });
     }
 
     // Log why it failed, never the raw model text, and never send it to the client.
     console.warn("Invalid triage output", {
       attempt,
       mode: LLM_STRUCTURED_OUTPUT,
-      promptVersion: PROMPT_VERSION,
+      promptVersion: info.promptVersion,
       reason: result.reason,
       rawLength: call.raw.length,
       issues: result.issues,

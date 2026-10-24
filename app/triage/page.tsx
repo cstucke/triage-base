@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import type { TriageResult } from "../../lib/schema";
+import type { DmTriageResult, Strategy, TriageResult } from "../../lib/schema";
 import type { Usage } from "../../lib/llm";
 
 type Version = "v1" | "v2";
@@ -14,10 +14,14 @@ const ENDPOINTS: Record<Version, string> = {
 
 export default function TriagePage() {
   const [version, setVersion] = useState<Version>("v2");
+  const [strategy, setStrategy] = useState<Strategy>("llm");
   const [subject, setSubject] = useState("");
   const [usage, setUsage] = useState<Usage | null>(null);
+  const [dmUsage, setDmUsage] = useState<Usage | null>(null);
   const [body, setBody] = useState("");
-  const [triage, setTriage] = useState<TriageResult | null>(null);
+  // dm returns category and priority only; llm and dm+llm return all four fields.
+  const [triage, setTriage] = useState<TriageResult | DmTriageResult | null>(null);
+  const [resultStrategy, setResultStrategy] = useState<Strategy>("llm");
   const [answer, setAnswer] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +42,7 @@ export default function TriagePage() {
       const response = await fetch(ENDPOINTS[version], {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticket: { subject, body } }),
+        body: JSON.stringify({ ticket: { subject, body }, strategy }),
       });
       const data: unknown = await response.json();
 
@@ -65,9 +69,15 @@ export default function TriagePage() {
         setAnswer(data.answer);
       } else {
         // The server only sends results that passed Zod validation.
-        const result = data as { triage: TriageResult; usage: Usage | null };
+        const result = data as {
+          triage: TriageResult | DmTriageResult;
+          usage: Usage | null;
+          dmUsage: Usage | null;
+        };
         setTriage(result.triage);
         setUsage(result.usage);
+        setDmUsage(result.dmUsage);
+        setResultStrategy(strategy);
       }
     } catch (error) {
       setError(
@@ -122,6 +132,17 @@ export default function TriagePage() {
           <option value="v1">v1: plain text, no checks</option>
           <option value="v2">v2: JSON checked with Zod</option>
         </select>
+        <label htmlFor="strategy">Strategy (v2)</label>
+        <select
+          id="strategy"
+          value={strategy}
+          onChange={(event) => setStrategy(event.target.value as Strategy)}
+          disabled={isSending}
+        >
+          <option value="llm">llm: the LLM triages the ticket</option>
+          <option value="dm">dm: the decision model chooses category and priority</option>
+          <option value="dm+llm">dm+llm: the DM chooses, the LLM writes summary and action</option>
+        </select>
         <label htmlFor="subject">Subject</label>
         <input
           id="subject"
@@ -158,20 +179,36 @@ export default function TriagePage() {
             <dd>{triage.category}</dd>
             <dt>Priority</dt>
             <dd>{triage.priority}</dd>
-            <dt>Summary</dt>
-            <dd>{triage.summary}</dd>
-            <dt>Suggested action</dt>
-            <dd>{triage.suggested_action}</dd>
-            <dt>Tokens</dt>
-            <dd>
-              {usage
-                ? `${usage.input} input, ${usage.output} output, ${usage.total} total`
-                : "Not reported by the provider"}
-            </dd>
+            {"summary" in triage && (
+              <>
+                <dt>Summary</dt>
+                <dd>{triage.summary}</dd>
+                <dt>Suggested action</dt>
+                <dd>{triage.suggested_action}</dd>
+                <dt>{resultStrategy === "dm+llm" ? "LLM tokens" : "Tokens"}</dt>
+                <dd>
+                  {usage
+                    ? `${usage.input} input, ${usage.output} output, ${usage.total} total`
+                    : "Not reported by the provider"}
+                </dd>
+              </>
+            )}
+            {resultStrategy !== "llm" && (
+              <>
+                <dt>DM tokens</dt>
+                <dd>
+                  {dmUsage
+                    ? `${dmUsage.input} input, ${dmUsage.output} output, ${dmUsage.total} total`
+                    : "Not reported by the provider"}
+                </dd>
+              </>
+            )}
           </dl>
-          <button type="button" onClick={explainTriage} disabled={isExplaining}>
-            {isExplaining ? "Explaining..." : "Explain"}
-          </button>
+          {"summary" in triage && (
+            <button type="button" onClick={explainTriage} disabled={isExplaining}>
+              {isExplaining ? "Explaining..." : "Explain"}
+            </button>
+          )}
           {explanation !== null && <p>{explanation}</p>}
         </section>
       )}

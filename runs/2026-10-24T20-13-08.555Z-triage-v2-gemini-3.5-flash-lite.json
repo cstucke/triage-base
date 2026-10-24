@@ -1,0 +1,148 @@
+{
+  "date": "2026-10-24T20:13:08.555Z",
+  "dataset": "labelled_100",
+  "strategy": "llm",
+  "prompt_version": "triage-v2",
+  "model": "gemini-3.5-flash-lite",
+  "outcome_counts": {
+    "200": 5
+  },
+  "category_accuracy": 0.8,
+  "priority_accuracy": 0.6,
+  "category_mismatches": 1,
+  "priority_mismatches": 2,
+  "category_confusion": {
+    "account": {
+      "technical_bug": 1,
+      "account": 1
+    },
+    "feature_request": {
+      "feature_request": 1
+    },
+    "billing": {
+      "billing": 1
+    },
+    "technical_bug": {
+      "technical_bug": 1
+    }
+  },
+  "avg_latency_ms": 4509,
+  "total_cost_usd": null,
+  "results": [
+    {
+      "ticket_id": "TCK-10357",
+      "outcome": 200,
+      "output": {
+        "category": "technical_bug",
+        "priority": "high",
+        "summary": "Workspace invitation emails are not being delivered to any users at the customer's company.",
+        "suggested_action": "Check email delivery logs and SMTP relay status for the domain to identify why invitation emails are blocked or failing to send."
+      },
+      "expected": {
+        "category": "account",
+        "priority": "medium"
+      },
+      "usage": {
+        "input": 159,
+        "output": 76,
+        "total": 235
+      },
+      "dm_usage": null,
+      "dm_answers": null,
+      "cost_usd": null,
+      "latency_ms": 3718
+    },
+    {
+      "ticket_id": "TCK-10023",
+      "outcome": 200,
+      "output": {
+        "category": "feature_request",
+        "priority": "low",
+        "summary": "Customer is inquiring about the availability of a native Snowflake connector for Kestrel ahead of their migration next quarter.",
+        "suggested_action": "Respond to the customer regarding the product roadmap status for a native Snowflake connector."
+      },
+      "expected": {
+        "category": "feature_request",
+        "priority": "medium"
+      },
+      "usage": {
+        "input": 158,
+        "output": 72,
+        "total": 230
+      },
+      "dm_usage": null,
+      "dm_answers": null,
+      "cost_usd": null,
+      "latency_ms": 5408
+    },
+    {
+      "ticket_id": "TCK-10150",
+      "outcome": 200,
+      "output": {
+        "category": "account",
+        "priority": "medium",
+        "summary": "A customer is requesting the complete deletion of their personal data under GDPR compliance.",
+        "suggested_action": "Verify the customer's identity and initiate the GDPR data deletion process for the specified account email."
+      },
+      "expected": {
+        "category": "account",
+        "priority": "medium"
+      },
+      "usage": {
+        "input": 178,
+        "output": 68,
+        "total": 246
+      },
+      "dm_usage": null,
+      "dm_answers": null,
+      "cost_usd": null,
+      "latency_ms": 3762
+    },
+    {
+      "ticket_id": "TCK-10470",
+      "outcome": 200,
+      "output": {
+        "category": "billing",
+        "priority": "medium",
+        "summary": "The customer is requesting a corrected invoice with their updated VAT number before month-end close.",
+        "suggested_action": "Verify the provided VAT number and generate a revised invoice (INV-22056) for the customer."
+      },
+      "expected": {
+        "category": "billing",
+        "priority": "medium"
+      },
+      "usage": {
+        "input": 187,
+        "output": 75,
+        "total": 262
+      },
+      "dm_usage": null,
+      "dm_answers": null,
+      "cost_usd": null,
+      "latency_ms": 3095
+    },
+    {
+      "ticket_id": "TCK-10431",
+      "outcome": 200,
+      "output": {
+        "category": "technical_bug",
+        "priority": "high",
+        "summary": "Large CSV exports from the Finance Summary fail with a 500 error since upgrading to version 5.0, blocking the customer's nightly reporting.",
+        "suggested_action": "Escalate the issue to the engineering team to investigate the timeout causing the 500 error on large CSV exports in version 5.0."
+      },
+      "expected": {
+        "category": "technical_bug",
+        "priority": "high"
+      },
+      "usage": {
+        "input": 179,
+        "output": 98,
+        "total": 277
+      },
+      "dm_usage": null,
+      "dm_answers": null,
+      "cost_usd": null,
+      "latency_ms": 6564
+    }
+  ]
+}

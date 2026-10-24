@@ -82,3 +82,19 @@ npm run build
 - [x] **Fixed:** the API rejects over-long input with `400` before any provider call (ticket body over 5,000 characters, `/api/triage`).
 - [x] Logs contain no key and no ticket text: `logs/llm-calls.jsonl` stores only time, route, API, prompt version, model, status, tokens and cost.
 - [x] The injection tickets do not change the category, priority or format of the answer: not verified yet (the smoke runs so far ended in `429`).
+
+## Decision Model (Activity 10)
+
+What the DM can and cannot do in this app:
+- It **can** choose `category` (4 options) and `priority` (3 options) from closed sets, with probabilities.
+- It **cannot** write `summary` or `suggested_action`: a decision model "cannot answer outside the options you gave it" and is not "able to write, summarize, explain, plan or reason in several steps". The `dm+llm` strategy therefore lets the DM choose and the LLM write.
+
+Comparison on the labelled dev set (2026-10-24; details in `LLM-DM-report.md`):
+
+| Strategy | Model(s) | Tickets | Category acc. | Priority acc. | Avg latency | Cost | Run file |
+|---|---|---|---|---|---|---|---|
+| `llm` | gemini-3.5-flash-lite | 5 (random sample) | 4/5 | 3/5 | 4,509 ms | no price set | `runs/2026-10-24T20-13-08.555Z-triage-v2-gemini-3.5-flash-lite.json` |
+| `dm` | vllm-sr/d3-flash | 99 of 100 (1 over-length ticket rejected with `400`) | 88/99 (88.9%) | 72/99 (72.7%) | 159 ms | $0 (free tier) | `runs/2026-10-24T20-12-38.976Z-dm-criteria-v1-vllm-sr-d3-flash.json` |
+| `dm+llm` | vllm-sr/d3-flash + gemini-3.5-flash-lite | 5 (random sample) | 5/5 | 3/5 | 4,165 ms | DM $0 (free tier), LLM no price set | `runs/2026-10-24T20-13-36.803Z-triage-dm-llm-v1-vllm-sr-d3-flash-gemini-3.5-flash-lite.json` |
+
+**Which model for which task:** use the decision model (vllm-sr/d3-flash) to choose category and priority, since it did that in about 0.16 s per ticket at no cost with 88.9% / 72.7% accuracy on 99 labelled tickets, and use the LLM (gemini-3.5-flash-lite) only to write the summary and suggested action, which the DM cannot do.

@@ -75,7 +75,7 @@ function TotalsTable({ title, label, groups }: { title: string; label: string; g
               <td>{t.input}</td>
               <td>{t.output}</td>
               <td>{t.total}</td>
-              <td>{t.noPrice > 0 ? "no price set" : `$${t.cost.toFixed(6)}`}</td>
+              <td>{t.noPrice > 0 ? "no price set" : t.cost === 0 && t.total > 0 ? "$0 (free tier)" : `$${t.cost.toFixed(6)}`}</td>
             </tr>
           ))}
         </tbody>
@@ -128,6 +128,7 @@ export default async function AdminPage() {
           <thead>
             <tr>
               <th>Time</th>
+              <th>Strategy</th>
               <th>Prompt version</th>
               <th>API</th>
               <th>Model</th>
@@ -142,6 +143,7 @@ export default async function AdminPage() {
             {rows.map((row, index) => (
               <tr key={index}>
                 <td>{row.ts}</td>
+                <td>{row.strategy ?? "llm"}</td>
                 <td>{row.prompt_version}</td>
                 <td>{row.api}</td>
                 <td>{row.model}</td>
@@ -180,7 +182,13 @@ export default async function AdminPage() {
                 <td>{run.category_accuracy === null ? "n/a" : `${Math.round(run.category_accuracy * 100)}%`}</td>
                 <td>{run.priority_accuracy === null ? "n/a" : `${Math.round(run.priority_accuracy * 100)}%`}</td>
                 <td>{run.avg_latency_ms} ms</td>
-                <td>{run.total_cost_usd === null ? "n/a" : `$${run.total_cost_usd.toFixed(6)}`}</td>
+                <td>
+                  {run.total_cost_usd === null
+                    ? "n/a"
+                    : run.total_cost_usd === 0
+                      ? "$0 (free tier)"
+                      : `$${run.total_cost_usd.toFixed(6)}`}
+                </td>
               </tr>
             ))}
           </tbody>

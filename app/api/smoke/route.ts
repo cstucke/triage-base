@@ -1,14 +1,16 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { costOf, LLM_MODEL, type Usage } from "../../../lib/llm";
-import { PROMPT_VERSION } from "../../../lib/prompt";
-import type { TriageResult } from "../../../lib/schema";
+import type { DmAnswers } from "../../../lib/dm";
+import type { Usage } from "../../../lib/llm";
+import type { DmTriageResult, Strategy, TriageResult } from "../../../lib/schema";
 import { DATASET_FILES, RUNS_DIR, type Dataset, type SmokeResult, type SmokeRun } from "../../../lib/smoke";
+import { STRATEGY_INFO, strategyCost } from "../../../lib/strategy";
 
 type DatasetTicket = { ticket_id: string; subject: string; body: string; category?: string; priority?: string };
 
 export async function POST(request: Request) {
-  const { dataset, count } = (await request.json()) as { dataset: Dataset; count: number };
+  const { dataset, count, strategy } = (await request.json()) as { dataset: Dataset; count: number; strategy: Strategy };
+  const { promptVersion, model } = STRATEGY_INFO[strategy];
   const tickets = JSON.parse(await readFile(DATASET_FILES[dataset], "utf8")) as DatasetTicket[];
 
   // Pick `count` tickets at random: shuffle (Fisher–Yates), then take the first ones.
@@ -25,18 +27,26 @@ export async function POST(request: Request) {
     const response = await fetch(new URL("/api/triage", request.url), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ticket: { subject: ticket.subject, body: ticket.body } }),
+      body: JSON.stringify({ ticket: { subject: ticket.subject, body: ticket.body },strategy }),
     });
-    const data = (await response.json()) as { triage?: TriageResult; usage?: Usage | null };
+    const data = (await response.json()) as {
+      triage?: TriageResult | DmTriageResult;
+      usage?: Usage | null;
+      dmUsage?: Usage | null;
+      dmAnswers?: DmAnswers;
+    };
     const usage = data.usage ?? null;
+    const dmUsage = data.dmUsage ?? null;
     results.push({
       ticket_id: ticket.ticket_id,
       outcome: response.status,
       output: data.triage ?? null,
       expected:
-        dataset === "labelled_100" ? { category: ticket.category ?? "", priority: ticket.priority ?? "" } : null,
+        dataset === "labelled_100" ? { category: ticket.category ?? "", priority:ticket.priority ?? "" } : null,
       usage,
-      cost_usd: costOf(usage),
+      dm_usage: dmUsage,
+      dm_answers: data.dmAnswers ?? null,
+      cost_usd: strategyCost(strategy, usage, dmUsage),
       latency_ms: Date.now() - start,
     });
   }
@@ -61,11 +71,12 @@ export async function POST(request: Request) {
   const run: SmokeRun = {
     date,
     dataset,
-    prompt_version: PROMPT_VERSION,
-    model: LLM_MODEL,
+    strategy,
+    prompt_version: promptVersion,
+    model,
     outcome_counts,
-    category_accuracy: pairs.length ? (pairs.length - category_mismatches) / pairs.length : null,
-    priority_accuracy: pairs.length ? (pairs.length - priority_mismatches) / pairs.length : null,
+    category_accuracy: pairs.length ? (pairs.length - category_mismatches) /pairs.length : null,
+    priority_accuracy: pairs.length ? (pairs.length - priority_mismatches) /pairs.length : null,
     category_mismatches,
     priority_mismatches,
     category_confusion,
@@ -75,7 +86,7 @@ export async function POST(request: Request) {
   };
 
   // runs/<date>-<prompt-version>-<model>.json, with characters not allowed in file names replaced.
-  const fileName = `${date}-${PROMPT_VERSION}-${LLM_MODEL}`.replace(/[^a-zA-Z0-9._-]/g, "-") + ".json";
+  const fileName = `${date}-${promptVersion}-${model}`.replace(/[^a-zA-Z0-9._-]/g, "-") + ".json";
   await mkdir(RUNS_DIR, { recursive: true });
   await writeFile(path.join(RUNS_DIR, fileName), JSON.stringify(run, null, 2));
 
