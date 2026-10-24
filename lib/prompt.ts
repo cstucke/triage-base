@@ -1,6 +1,15 @@
 import type { StructuredOutputMode } from "./llm";
 import { CATEGORIES, PRIORITIES } from "./triage";
 
+export const PROMPT_VERSION_V1 = "triage-v1";
+
+export const SYSTEM_PROMPT_V1 = `You are a support ticket triage assistant for a software company.
+Read the support ticket inside <ticket> tags and reply with:
+- Category: one of ${CATEGORIES.join(", ")}.
+- Priority: one of ${PRIORITIES.join(", ")}.
+- Summary: a concise one-sentence summary of the customer's issue.
+- Suggested action: one next step for the support agent.`;
+
 export const PROMPT_VERSION = "v2";
 
 const BASE_PROMPT = `You are a support ticket triage assistant for a software company.

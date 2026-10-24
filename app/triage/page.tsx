@@ -3,10 +3,20 @@
 import { useState, type FormEvent } from "react";
 import type { TriageResult } from "../../lib/triage";
 
+type Version = "v1" | "v2";
+
+// v1 returns the model's plain text as-is; v2 returns a Zod-checked object.
+const ENDPOINTS: Record<Version, string> = {
+  v1: "/api/triage/v1",
+  v2: "/api/triage",
+};
+
 export default function TriagePage() {
+  const [version, setVersion] = useState<Version>("v2");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [triage, setTriage] = useState<TriageResult | null>(null);
+  const [answer, setAnswer] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,9 +27,10 @@ export default function TriagePage() {
     setIsSending(true);
     setError(null);
     setTriage(null);
+    setAnswer(null);
 
     try {
-      const response = await fetch("/api/triage", {
+      const response = await fetch(ENDPOINTS[version], {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ticket: { subject, body } }),
@@ -37,8 +48,20 @@ export default function TriagePage() {
         throw new Error(detail);
       }
 
-      // The server only sends results that passed Zod validation.
-      setTriage((data as { triage: TriageResult }).triage);
+      if (version === "v1") {
+        if (
+          typeof data !== "object" ||
+          data === null ||
+          !("answer" in data) ||
+          typeof data.answer !== "string"
+        ) {
+          throw new Error("The server returned an invalid reply. Please try again.");
+        }
+        setAnswer(data.answer);
+      } else {
+        // The server only sends results that passed Zod validation.
+        setTriage((data as { triage: TriageResult }).triage);
+      }
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Unable to triage this ticket. Please try again.",
@@ -53,6 +76,16 @@ export default function TriagePage() {
       <h1>Ticket triage</h1>
       <p>Paste a support ticket to get a category, priority, summary and suggested action.</p>
       <form onSubmit={submitTicket} aria-busy={isSending}>
+        <label htmlFor="version">Triage version</label>
+        <select
+          id="version"
+          value={version}
+          onChange={(event) => setVersion(event.target.value as Version)}
+          disabled={isSending}
+        >
+          <option value="v1">v1: plain text, no checks</option>
+          <option value="v2">v2: JSON checked with Zod</option>
+        </select>
         <label htmlFor="subject">Subject</label>
         <input
           id="subject"
@@ -74,6 +107,14 @@ export default function TriagePage() {
         </button>
         {error && <p role="alert">{error}</p>}
       </form>
+      {answer !== null && (
+        <section className="messages" aria-label="Triage result" aria-live="polite">
+          <div className="message assistant">
+            <strong>Model answer (v1, unchecked)</strong>
+            <p>{answer}</p>
+          </div>
+        </section>
+      )}
       {triage && (
         <section className="messages" aria-label="Triage result" aria-live="polite">
           <dl>
